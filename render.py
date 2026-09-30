@@ -25,6 +25,36 @@ def draw_table(surface: pygame.Surface, table: object) -> None:
     pygame.draw.line(surface, S.MAGENTA, (S.PLUNGER_LANE_X - 22, 345), (S.PLUNGER_LANE_X - 22, S.TABLE_BOTTOM), 2)
 
 
+def draw_ball(surface: pygame.Surface, position: tuple[float, float], glow: bool) -> None:
+    point = (round(position[0]), round(position[1]))
+    if glow:
+        layer = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
+        for radius, alpha in ((24, 22), (18, 35), (14, 55)):
+            pygame.draw.circle(layer, (*S.CYAN, alpha), point, radius)
+        surface.blit(layer, (0, 0))
+    pygame.draw.circle(surface, S.WHITE, point, S.BALL_RADIUS)
+    pygame.draw.circle(surface, S.CYAN, point, S.BALL_RADIUS, 2)
+    pygame.draw.circle(surface, S.WHITE, (point[0] - 3, point[1] - 3), 2)
+
+
+def draw_flipper(surface: pygame.Surface, flipper: object) -> None:
+    start, end = flipper.endpoints
+    pygame.draw.line(surface, S.MAGENTA, start, end, S.FLIPPER_RADIUS * 2)
+    pygame.draw.line(surface, S.WHITE, start, end, 2)
+    pygame.draw.circle(surface, S.YELLOW, start, S.FLIPPER_RADIUS + 3, 2)
+
+
+def draw_plunger(surface: pygame.Surface, power: float) -> None:
+    base_y = 830
+    pygame.draw.line(surface, S.YELLOW, (S.PLUNGER_LANE_X, base_y), (S.PLUNGER_LANE_X, base_y - 35 + int(22 * power)), 5)
+    pygame.draw.rect(surface, S.WHITE, (S.PLUNGER_LANE_X - 13, base_y, 26, 7), 2)
+    meter = pygame.Rect(S.WIDTH - 24, 510, 8, 180)
+    pygame.draw.rect(surface, S.DIM_CYAN, meter, 1)
+    fill = int(meter.height * power)
+    if fill:
+        pygame.draw.rect(surface, S.YELLOW, (meter.x + 2, meter.bottom - fill, meter.width - 4, fill))
+
+
 def draw_scanlines(surface: pygame.Surface) -> None:
     overlay = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
     for y in range(0, S.HEIGHT, 4):
