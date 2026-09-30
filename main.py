@@ -16,6 +16,7 @@ def run(smoke_frames: int = 0) -> None:
     import settings as S
     from game import Game
 
+    pygame.mixer.pre_init(S.SAMPLE_RATE, size=-16, channels=S.AUDIO_CHANNELS, buffer=S.AUDIO_BUFFER)
     pygame.init()
     pygame.display.set_caption("Neon Pinball")
     screen = pygame.display.set_mode((S.WIDTH, S.HEIGHT))

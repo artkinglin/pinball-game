@@ -72,6 +72,19 @@ HIGH_SCORE_FILE = "highscore.json"
 
 MASTER_VOLUMES = (0.0, 0.22, 0.45, 0.7)
 SAMPLE_RATE = 44_100
+AUDIO_CHANNELS = 2
+AUDIO_BUFFER = 512
+DEFAULT_VOLUME_INDEX = 2
+SOUND_SPECS = {
+    "flipper": (155.0, 0.045, "noise"),
+    "bumper": (720.0, 0.12, "square"),
+    "launch": (220.0, 0.22, "riser"),
+    "target": (980.0, 0.09, "square"),
+    "sling": (430.0, 0.07, "triangle"),
+    "lane": (1120.0, 0.07, "triangle"),
+    "drain": (185.0, 0.36, "faller"),
+    "game_over": (105.0, 0.65, "faller"),
+}
 
 HUD_MARGIN = 18
 SCANLINE_ALPHA = 22

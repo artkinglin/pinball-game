@@ -9,6 +9,7 @@ import pygame
 import pymunk
 
 import settings as S
+from audio import AudioManager
 from entities import Ball, Flipper, Plunger
 from render import draw_ball, draw_flipper, draw_plunger, draw_table, draw_text, pixel_font
 from table import Table
@@ -22,6 +23,7 @@ class Game:
         self.space = pymunk.Space()
         self.space.gravity = (0, S.GRAVITY)
         self.table = Table(self.space)
+        self.audio = AudioManager()
         self.ball = Ball(self.space, S.PLUNGER_SPAWN)
         self.left_flipper = Flipper(
             self.space, S.LEFT_FLIPPER_PIVOT, S.LEFT_FLIPPER_REST, S.LEFT_FLIPPER_ACTIVE, True
@@ -98,6 +100,7 @@ class Game:
 
     def _drain_ball(self) -> None:
         self.ball.remove(self.space)
+        self.audio.play("drain")
         self.tilted = False
         self.nudge_times.clear()
         if self.balls_remaining > 1:
@@ -106,6 +109,7 @@ class Game:
         else:
             self.balls_remaining = 0
             self.game_over = True
+            self.audio.play("game_over")
             self._save_high_score()
 
     def _serve_ball(self) -> None:
@@ -170,6 +174,8 @@ class Game:
         if event.type == pygame.KEYDOWN and event.key == pygame.K_c:
             self.crt = not self.crt
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_m:
+                self.audio.cycle_volume()
             if event.key == pygame.K_r:
                 self.restart()
             if event.key == pygame.K_RETURN and self.game_over:
@@ -178,8 +184,10 @@ class Game:
                 self._nudge()
             if event.key in (pygame.K_LSHIFT, pygame.K_LEFT):
                 self.left_flipper.pressed = True
+                self.audio.play("flipper")
             if event.key in (pygame.K_RSHIFT, pygame.K_RIGHT):
                 self.right_flipper.pressed = True
+                self.audio.play("flipper")
             if event.key == pygame.K_SPACE:
                 self.plunger.held = True
         if event.type == pygame.KEYUP:
@@ -191,6 +199,7 @@ class Game:
                 impulse = self.plunger.release_impulse()
                 if self.ball.body.position.x > S.PLUNGER_LANE_X - 24 and self.ball.body.position.y > 690:
                     self.ball.body.apply_impulse_at_local_point((0, -impulse))
+                    self.audio.play("launch")
         return True
 
     def update(self, dt: float) -> None:
@@ -231,7 +240,9 @@ class Game:
             "lane": S.LANE_SCORE,
         }
         while self.hit_events:
-            self.add_score(values[self.hit_events.pop(0)])
+            event_name = self.hit_events.pop(0)
+            self.add_score(values[event_name])
+            self.audio.play(event_name)
         if self.target_reset_timer <= 0 and self.table.targets and all(target.down for target in self.table.targets):
             self.add_score(S.CLEAR_BONUS * 2)
             self.target_reset_timer = S.TARGET_RESET_DELAY
@@ -251,6 +262,7 @@ class Game:
         draw_text(self.screen, self.hud_font, f"SCORE {self.score:08d}", (S.HUD_MARGIN, 48), S.GREEN)
         draw_text(self.screen, self.hud_font, f"BALLS {self.balls_remaining}", (S.WIDTH - 125, 48), S.YELLOW)
         draw_text(self.screen, self.hud_font, f"HI {self.high_score:08d}", (S.HUD_MARGIN, S.HEIGHT - 27), S.CYAN)
+        draw_text(self.screen, self.hud_font, f"VOL {self.audio.volume_percent:02d}", (S.WIDTH - 100, S.HEIGHT - 27), S.WHITE)
         for lane in self.table.lanes:
             draw_text(self.screen, self.hud_font, lane.label, (lane.x, 88), S.GREEN if lane.lit else S.WHITE, center=True)
         if self.tilted:
