@@ -23,6 +23,23 @@ def draw_table(surface: pygame.Surface, table: object) -> None:
     for wall in table.walls:
         pygame.draw.line(surface, S.CYAN, wall.a, wall.b, 2)
     pygame.draw.line(surface, S.MAGENTA, (S.PLUNGER_LANE_X - 22, 345), (S.PLUNGER_LANE_X - 22, S.TABLE_BOTTOM), 2)
+    for bumper in table.bumpers:
+        position = tuple(map(round, bumper.position))
+        if bumper.flash > 0:
+            pygame.draw.circle(surface, bumper.color, position, S.BUMPER_RADIUS + 10, 2)
+        pygame.draw.circle(surface, bumper.color, position, S.BUMPER_RADIUS, 3)
+        pygame.draw.circle(surface, S.WHITE, position, S.BUMPER_RADIUS - 8, 1)
+        pygame.draw.circle(surface, bumper.color, position, 5)
+    for sling in table.slings:
+        color = S.WHITE if sling.flash > 0 else S.MAGENTA
+        pygame.draw.polygon(surface, color, sling.points, 3)
+    for target in table.targets:
+        color = S.DIM_CYAN if target.down else S.YELLOW
+        width = 1 if target.down else 6
+        pygame.draw.line(surface, color, target.start, target.end, width)
+    for lane in table.lanes:
+        color = S.GREEN if lane.lit else S.CYAN
+        pygame.draw.line(surface, color, (lane.x - 20, 112), (lane.x + 20, 112), 2)
 
 
 def draw_ball(surface: pygame.Surface, position: tuple[float, float], glow: bool) -> None:
