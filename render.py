@@ -18,13 +18,18 @@ def draw_text(surface: pygame.Surface, font: pygame.font.Font, text: str, pos: t
     surface.blit(image, rect)
 
 
-def draw_table(surface: pygame.Surface, table: object) -> None:
+def draw_table(surface: pygame.Surface, table: object, glow: bool = True) -> None:
     """Draw the initial neon table outlines."""
+    glow_layer = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
     for wall in table.walls:
+        if glow:
+            pygame.draw.line(glow_layer, (*S.CYAN, 28), wall.a, wall.b, 9)
         pygame.draw.line(surface, S.CYAN, wall.a, wall.b, 2)
     pygame.draw.line(surface, S.MAGENTA, (S.PLUNGER_LANE_X - 22, 345), (S.PLUNGER_LANE_X - 22, S.TABLE_BOTTOM), 2)
     for bumper in table.bumpers:
         position = tuple(map(round, bumper.position))
+        if glow:
+            pygame.draw.circle(glow_layer, (*bumper.color, 25), position, S.BUMPER_RADIUS + 12)
         if bumper.flash > 0:
             pygame.draw.circle(surface, bumper.color, position, S.BUMPER_RADIUS + 10, 2)
         pygame.draw.circle(surface, bumper.color, position, S.BUMPER_RADIUS, 3)
@@ -40,6 +45,8 @@ def draw_table(surface: pygame.Surface, table: object) -> None:
     for lane in table.lanes:
         color = S.GREEN if lane.lit else S.CYAN
         pygame.draw.line(surface, color, (lane.x - 20, 112), (lane.x + 20, 112), 2)
+    if glow:
+        surface.blit(glow_layer, (0, 0), special_flags=pygame.BLEND_RGBA_ADD)
 
 
 def draw_ball(surface: pygame.Surface, position: tuple[float, float], glow: bool) -> None:

@@ -11,7 +11,7 @@ import pymunk
 import settings as S
 from audio import AudioManager
 from entities import Ball, Flipper, Plunger
-from render import draw_ball, draw_flipper, draw_plunger, draw_table, draw_text, pixel_font
+from render import draw_ball, draw_flipper, draw_plunger, draw_scanlines, draw_table, draw_text, pixel_font
 from table import Table
 
 
@@ -143,7 +143,7 @@ class Game:
         shape = self._other_shape(arbiter)
         sling = next(item for item in self.table.slings if item.shape is shape)
         if sling.flash <= 0:
-            self.ball.body.apply_impulse_at_local_point(sling.kick)
+            self.ball.body.apply_impulse_at_world_point(sling.kick, self.ball.body.position)
             sling.flash = S.FLASH_TIME
             self.hit_events.append("sling")
         return True
@@ -252,7 +252,7 @@ class Game:
 
     def draw(self) -> None:
         self.screen.fill(S.BLACK)
-        draw_table(self.screen, self.table)
+        draw_table(self.screen, self.table, self.crt)
         draw_flipper(self.screen, self.left_flipper)
         draw_flipper(self.screen, self.right_flipper)
         draw_plunger(self.screen, self.plunger.power)
@@ -275,3 +275,5 @@ class Game:
             draw_text(self.screen, self.hud_font, "PRESS ENTER", (S.WIDTH // 2, 480), S.YELLOW, center=True)
         if self.paused:
             draw_text(self.screen, self.title_font, "PAUSED", (S.WIDTH // 2, S.HEIGHT // 2), S.YELLOW, center=True)
+        if self.crt:
+            draw_scanlines(self.screen)
